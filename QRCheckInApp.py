@@ -2,20 +2,16 @@ import cv2
 import tkinter as tk
 from tkinter import messagebox
 from pyzbar.pyzbar import decode
-
+import pandas as pd
 
 class RegisteredList:
-    def __init__(self):
-        self.registered = {
-            "TEAM HOI DAP IS DA BEST!": 1,
-            "https://myqr.pro/5f69885602f760": 2,
-            "https://irrelevant-jellyfish.jurassic.ninja/2023/05/22/new/": 3,
-            "http://www.maptitecreation.fr": 4,
-            "https://luatbaoloi.com": 5,
-            "https://skhdt.binhdinh.gov.vn/vi/thu-tuc-hanh-chinh/thu-tuc-dang-ky-doanh-nghiep.html": 6,
-            "https://www.1check.vn/": 7,
-            "http://bvu.edu.vn": 8,
-        }
+    def __init__(self, excel_file):
+        self.registered = self.read_excel(excel_file)
+        self.checkedIn = []
+
+    def read_excel(self, excel_file):
+        df = pd.read_excel(excel_file)
+        return df["ID"].tolist()
         self.checkedIn = []
 
     def getData(self):
@@ -30,12 +26,14 @@ class RegisteredList:
     def checkIn(self, ID):
         if self.isRegistered(ID):
             self.checkedIn.append(ID)
-            pass
+            dup= filter(lambda id: id==ID, self.checkedIn)
+            print (dup)
+
 
 
 class QRCodeScannerApp:
-    def __init__(self, window, window_title):
-        self.registeredList = RegisteredList()
+    def __init__(self, window, window_title, excel_file):
+        self.registeredList = RegisteredList(excel_file)
         self.registered = self.registeredList.getData()
 
         self.window = window
@@ -64,7 +62,7 @@ class QRCodeScannerApp:
             self.showIMG(frame)
             data = self.scan_qr_code(frame)
             self.registeredList.checkIn(data)
-            print(self.registeredList.getCheckedIn())
+            # print(self.registeredList.getCheckedIn())
 
         self.after_id = self.window.after(10, self.update)
 
@@ -88,4 +86,4 @@ class QRCodeScannerApp:
 
 # Create a window and pass it to the QRCodeScannerApp class
 root = tk.Tk()
-app = QRCodeScannerApp(root, "QR Code Scanner App")
+app = QRCodeScannerApp(root, "QR Code Scanner App", "E:\C#\DANH SÁCH NGƯỜI THAM GIA PROM NIGHT 2023.xlsx")
