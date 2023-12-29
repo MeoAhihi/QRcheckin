@@ -10,6 +10,7 @@ class RegisteredList:
     def __init__(self, excel_file):
         self.registered = self.read_excel(excel_file)
         self.checkedIn = []
+        self.file = open('checkedin.txt', 'w')
 
     def read_excel(self, excel_file):
         df = pd.read_excel(excel_file)
@@ -27,7 +28,7 @@ class RegisteredList:
     def getNameFromID(self, ID):
         for record in self.registered:
             if record['ID'] == ID:
-                return record['HọvàTên']
+                return record
         return None
 
     def splitNamePhone(self, ID):
@@ -38,19 +39,26 @@ class RegisteredList:
     def checkIn(self, ID):
         if self.isRegistered(ID):
             if ID in self.checkedIn:
-                messagebox.showinfo("Duplicate ID", "ID {} has already been checked in.".format(ID))
+                messagebox.showinfo(
+                    "Duplicate ID", "ID {} has already been checked in.".format(ID))
             else:
                 phone, email = self.splitNamePhone(ID)
-                name = self.getNameFromID(ID)
+                record = self.getNameFromID(ID)
+                name = record['HọvàTên']
                 if name is None:
-                    messagebox.showinfo("Invalid ID", "Invalid ID: {}".format(ID))
+                    messagebox.showinfo(
+                        "Invalid ID", "Invalid ID: {}".format(ID))
                 else:
-                    confirmation = messagebox.askquestion("Check-in Confirmation", "Bạn có phải là:\nHọ và Tên:{}\nSố điện thoại:{}\nEmail:{}?".format(name,phone,email))
+                    confirmation = messagebox.askquestion(
+                        "Check-in Confirmation", "Bạn có phải là:\nHọ và Tên: {}\nSố điện thoại: {}\nEmail: {}?".format(name, phone, email))
                     if confirmation == 'yes':
                         self.checkedIn.append(ID)
-                        messagebox.showinfo("Check-in", "Chúc Mừng Bạn Đã Check-in Thành Công.")
+                        messagebox.showinfo(
+                            "Check-in", "Chúc Mừng Bạn Đã Check-in Thành Công.")
+                        self.file.write(f"{record['ID']}")
                     else:
-                        messagebox.showinfo("Check-in", "Vui Lòng Cho Xin Thông Tin Người Dùng.")
+                        messagebox.showinfo(
+                            "Check-in", "Vui Lòng Cho Xin Thông Tin Người Dùng.")
         else:
             if not self.isRegistered(ID):
                 messagebox.showerror('Lỗi', 'Mã QR Không Hợp Lệ')
@@ -59,28 +67,29 @@ class RegisteredList:
 class QRCodeScannerApp:
     def __init__(self, window, window_title, excel_file):
         self.registeredList = RegisteredList(excel_file)
-        self.registered = [record['ID'] for record in self.registeredList.getData()]
+        self.registered = [record['ID']
+                           for record in self.registeredList.getData()]
 
         self.window = window
         self.window.title(window_title)
 
         # Tạo đối tượng hình ảnh từ tệp PNG
-        image = Image.open(image_path)
+        # image = Image.open(image_path)
 
         # Lấy kích thước của cửa sổ
         window_width = self.window.winfo_screenwidth()
         window_height = self.window.winfo_screenheight()
 
         # Resize hình ảnh để phù hợp với kích thước cửa sổ
-        resized_image = image.resize((window_width, window_height))
-        self.background_image = ImageTk.PhotoImage(resized_image)
-        self.background_label = tk.Label(window, image=self.background_image)
-        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
+        # resized_image = image.resize((window_width, window_height))
+        # self.background_image = ImageTk.PhotoImage(resized_image)
+        # self.background_label = tk.Label(window, image=self.background_image)
+        # self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         frame = tk.Frame(window)
         frame.place(relx=0.5, rely=0.5, anchor='center')
         self.scan_here = tk.Label(
-            frame,text="QUÉT MÃ QR ĐÃ ĐƯỢC GỬI QUA EMAIL ĐỂ CHECK-IN", font=("Times New Roman", 19), fg="white")
+            frame, text="QUÉT MÃ QR ĐÃ ĐƯỢC GỬI QUA EMAIL ĐỂ CHECK-IN", font=("Times New Roman", 19), fg="white")
         self.scan_here.configure(background="#%02x%02x%02x" % (0, 0, 0))
         self.scan_here.pack()
 
@@ -134,5 +143,6 @@ class QRCodeScannerApp:
 # Create a window and pass it to the QRCodeScannerApp class
 root = tk.Tk()
 image_path = "C:\\Users\\lehoa\\OneDrive\\Desktop\\Base prom poster [Recov-01.png"
-app = QRCodeScannerApp(root, "QR Code Scanner App", "E:\\C#\\DANH SÁCH NGƯỜI THAM GIA PROM NIGHT 2023.xlsx")
+app = QRCodeScannerApp(root, "QR Code Scanner App",
+                       "D:\\Qrcheckin\\DANH SÁCH NGƯỜI THAM GIA PROM NIGHT 2023.xlsx")
 root.mainloop()
